@@ -1,0 +1,1139 @@
+// //for given groups creates all matches and saves them, ideal number of groups is two, then there can be time needed for rest
+    // //between rounds for any group, If only one group is given, time for rest will be used also
+    // public static void create_matches_groups(Group[] groups, Field[] fields, int match_t) {
+    //     int num_groups = groups.length;
+    //     int[] teams_size = new int[num_groups];
+    //     for (int i = 0; i < num_groups; i++) {
+    //         teams_size[i] = groups[i].teams.length;
+    //     }
+    //     int index_field_1 = -1;
+    //     int index_field_2 = -1;
+    //     int referee_index = -1;
+    //     int[][][] matches;
+    //     int[][] referees;
+    //     int index_team_A;
+    //     int index_team_B;
+    //     boolean both_matches_per_round = false;
+    //     switch (num_groups) {
+    //         case 1: //one group
+    //             int team_size = groups[0].teams.length;
+    //             switch (team_size) {
+    //                 //category has only 1 group with 3 teams so we fill matches only in one field and we must give teams rest after match
+    //                 case 3:
+    //                     index_field_1 = get_free_field();
+    //                     for (int i = 0; i < team_size; i++) {
+    //                         for (int j = 0; j < team_size; j++) {
+    //                             if (j > i) {
+    //                                 for (int k = 0; k < team_size; k++) {
+    //                                     if (k != i && k != j) {
+    //                                         referee_index = k;
+    //                                         break;
+    //                                     }
+    //                                 }
+    //                                 Match new_match = new Match(groups[0].teams[i], groups[0].teams[j],
+    //                                         groups[0].teams[referee_index],
+    //                                         fields[index_field_1].curr_time + rest_t, match_t, fields[index_field_1]);
+    //                                 fields[index_field_1].add_match(new_match);
+    //                                 groups[0].save_match(new_match);
+    //                             }
+    //                         }
+    //                     }
+    //                     break;
+    //                 //category has only 1 group with 4 or 5 teams so we can use 2 fields with rest after every round or only 1 field with rest after every second match (end of round)
+    //                 case 4:
+    //                 case 5:
+    //                     index_field_1 = get_free_field();
+    //                     int num_rounds = -1;
+    //                     //3d array, first [] is for round, second [] is for 1st or 2nd match in that round, 3rd [] is for team_A at index 0 and team_B at index 1
+    //                     if (team_size == 4) {
+    //                         matches = new int[][][] { { { 0, 3 }, { 1, 2 } }, { { 3, 2 }, { 0, 1 } },
+    //                                 { { 1, 3 }, { 2, 0 } } };
+    //                         referees = new int[][] { { 1, 3 }, { 0, 2 }, { 0, 1 } }; //array holding information of index of referee team for each match
+    //                         num_rounds = 3;
+    //                     } else { //num_teams == 5 
+    //                         matches = new int[][][] { { { 0, 1 }, { 2, 3 } }, { { 0, 4 }, { 1, 3 } }, //int this way none team plays two matches after each other
+    //                                 { { 2, 4 }, { 0, 3 } }, { { 1, 4 }, { 0, 2 } }, { { 3, 4 }, { 1, 2 } } };
+    //                         referees = new int[][] { { 4, 4 }, { 2, 2 }, { 1, 1 }, { 3, 3 }, { 0, 0 } }; //array holding information of index of referee team for each match
+    //                         num_rounds = 5;
+    //                     }
+
+    //                     //there is some connected field that we might use
+    //                     if (!is_conected_field(index_field_1)) {
+    //                         both_matches_per_round = false;
+    //                         int[] match_rest = new int[] { 0, 0 };
+    //                         for (int i = 0; i < num_rounds; i++) {
+    //                             //playing teams of first match of the round
+    //                             index_team_A = matches[i][0][0];
+    //                             index_team_B = matches[i][0][1];
+    //                             if (team_size == 4)
+    //                                 referee_index = index_team_A; //if for second match of the current round we can use another field, we must use referee from playing field
+    //                             else { //num_teams == 5
+    //                                 referee_index = referees[i][0];
+    //                             }
+
+    //                             //first match of the round
+    //                             Match new_match_1 = new Match(groups[0].teams[index_team_A],
+    //                                     groups[0].teams[index_team_B],
+    //                                     groups[0].teams[referee_index], fields[index_field_1].curr_time + match_rest[0],
+    //                                     match_t, fields[index_field_1]);
+
+    //                             fields[index_field_1].add_match(new_match_1);
+    //                             groups[0].save_match(new_match_1);
+
+    //                             if (!both_matches_per_round) //if we have already found some second field to use, we no longer search for another one
+    //                                 index_field_2 = get_free_conected_field(index_field_1);
+
+    //                             //playing teams of second match of the round
+    //                             index_team_A = matches[i][1][0];
+    //                             index_team_B = matches[i][1][1];
+
+    //                             //there is connected field but some match is alredy in it or it is not efficient to travel
+    //                             if (index_field_2 == -1) {
+    //                                 if (team_size == 4) {
+    //                                     new_match_1.referee_team = groups[0].teams[referees[i][0]]; //in this situation we can use referee from other team for the first match of the round
+    //                                     new_match_1.referee = new_match_1.referee_team.coach;
+    //                                 } //else we do not need to change referee of the first match
+
+    //                                 referee_index = referees[i][1];
+    //                                 Match new_match_2 = new Match(groups[0].teams[index_team_A],
+    //                                         groups[0].teams[index_team_B],
+    //                                         groups[0].teams[referee_index],
+    //                                         fields[index_field_1].curr_time + match_rest[1],
+    //                                         match_t, fields[index_field_1]);
+
+    //                                 fields[index_field_1].add_match(new_match_2);
+    //                                 groups[0].save_match(new_match_2);
+    //                                 both_matches_per_round = false;
+    //                                 if (num_rounds == 3) { //if num_rounds == 5, then there is no need for pause between matches
+    //                                     match_rest[0] = rest_t;
+    //                                     match_rest[1] = 0;
+    //                                 }
+    //                             } else { //there is another field that we shall use
+    //                                 if (team_size == 4)
+    //                                     referee_index = index_team_B; //we must use referee from playing team
+    //                                 else
+    //                                     referee_index = referees[i][1]; //we can use referee from non playing team
+
+    //                                 Match new_match_2 = new Match(groups[0].teams[index_team_A],
+    //                                         groups[0].teams[index_team_B],
+    //                                         groups[0].teams[referee_index], new_match_1.start, match_t, //we must start at the same time as new_match_1 to avoid problems
+    //                                         fields[index_field_2]);
+
+    //                                 fields[index_field_2].add_match(new_match_2);
+    //                                 groups[0].save_match(new_match_2);
+    //                                 //now we need pause after end of the round
+    //                                 match_rest[0] = rest_t;
+    //                                 match_rest[1] = rest_t;
+    //                                 both_matches_per_round = true;
+    //                             }
+    //                         }
+    //                     } else { //there is none connected field with fields[index_field_1], if teams size is 4, we must give teams rest after every second match (end of round)
+    //                         int[] match_rest = new int[] { 0, 0 }; //first round does not need rest before start of the match
+    //                         for (int i = 0; i < num_rounds; i++) {
+    //                             if (i != 0 && num_rounds == 3) { //if num_rounds == 5 or it´s first round(i==1), then there is no need for pause after end of the round
+    //                                 match_rest[0] = rest_t;
+    //                                 match_rest[1] = 0;
+    //                             }
+    //                             for (int j = 0; j < 2; j++) {
+    //                                 index_team_A = matches[i][j][0];
+    //                                 index_team_B = matches[i][j][1];
+    //                                 referee_index = referees[i][j]; //we can use referee from non playing team
+    //                                 Match new_match = new Match(groups[0].teams[index_team_A],
+    //                                         groups[0].teams[index_team_B],
+    //                                         groups[0].teams[referee_index],
+    //                                         fields[index_field_1].curr_time + match_rest[j],
+    //                                         match_t, fields[index_field_1]);
+
+    //                                 fields[index_field_1].add_match(new_match);
+    //                                 groups[0].save_match(new_match);
+    //                             }
+    //                         }
+    //                     }
+    //                     break;
+    //                 default:
+    //                     new Exception("Number of teams at given group is wrong");
+    //                     break;
+    //             }
+    //             break;
+    //         case 2: //2 groups
+    //             //Remark: difference between size of teams of each group can be 0 or 1
+    //             if (teams_size[0] == teams_size[1]) {
+    //                 team_size = teams_size[0];
+    //                 //we shall use 1 field and instead of having rest after each match, we do one match from group_0, then one match from group_1 and repeat
+    //                 if (teams_size[0] == 3) {
+    //                     index_field_1 = get_free_field();
+    //                     for (int i = 0; i < team_size; i++) {
+    //                         for (int j = 0; j < team_size; j++) {
+    //                             if (j > i) {
+    //                                 for (int k = 0; k < team_size; k++) {
+    //                                     if (k != i && k != j) {
+    //                                         referee_index = k;
+    //                                         break;
+    //                                     }
+    //                                 }
+    //                                 //match for 1st and 2nd group for current round
+    //                                 for (int k = 0; k < teams_size.length; k++) {
+    //                                     Match new_match = new Match(groups[k].teams[i], groups[k].teams[j],
+    //                                             groups[k].teams[referee_index],
+    //                                             fields[index_field_1].curr_time, match_t, fields[index_field_1]);
+                                            
+    //                                     fields[index_field_1].add_match(new_match);
+    //                                     groups[k].save_match(new_match);
+    //                                 }
+    //                             }
+    //                         }
+    //                     }
+    //                 } //for teams_size 4 or 5 the algorithm is very similar, we use either 1 field and for each round we first create matches from 
+    //                   //one group and after that from the second so we do not need to have pause after each round, or we use 2 fields and we create
+    //                   //both matches of each round at the same time and switch groups after each round (again we do not need to have pause)
+    //                 else {
+    //                     index_field_1 = get_free_field();
+    //                     int num_rounds = -1;
+    //                     //3d array, first [] is for round, second [] is for 1st or 2nd match in that round, 3rd [] is for team_A at index 0 and team_B at index 1
+    //                     if (team_size == 4) {
+    //                         matches = new int[][][] { { { 0, 3 }, { 1, 2 } }, { { 3, 2 }, { 0, 1 } },
+    //                                 { { 1, 3 }, { 2, 0 } } };
+    //                         referees = new int[][] { { 1, 3 }, { 0, 2 }, { 0, 1 } }; //array holding information of index of referee team for each match
+    //                         num_rounds = 3;
+    //                     } else { //num_teams == 5 
+    //                         matches = new int[][][] { { { 1, 4 }, { 2, 3 } }, { { 4, 2 }, { 0, 1 } },
+    //                                 { { 2, 0 }, { 3, 4 } }, { { 0, 3 }, { 1, 2 } }, { { 3, 1 }, { 4, 0 } } };
+    //                         referees = new int[][] { { 0, 0 }, { 3, 3 }, { 1, 1 }, { 4, 4 }, { 2, 2 } }; //array holding information of index of referee team for each match
+    //                         num_rounds = 5;
+    //                     }
+
+    //                     //there is some connected field that we might use
+    //                     if (!is_conected_field(index_field_1)) {
+    //                         both_matches_per_round = false;
+    //                         for (int i = 0; i < num_rounds; i++) {
+    //                             for (int j = 0; j < teams_size.length; j++) {
+    //                                 //playing teams of first match of the round
+    //                                 index_team_A = matches[i][0][0];
+    //                                 index_team_B = matches[i][0][1];
+    //                                 referee_index = referees[i][0]; //we will use referee from the other group so he will be always avaible
+    //                                 int referee_group = j == 0 ? 1 : 0;
+    //                                 //first match of the round
+    //                                 Match new_match_1 = new Match(groups[j].teams[index_team_A],
+    //                                         groups[j].teams[index_team_B],
+    //                                         groups[referee_group].teams[referee_index], fields[index_field_1].curr_time,
+    //                                         match_t, fields[index_field_1]);
+
+    //                                 fields[index_field_1].add_match(new_match_1);
+    //                                 groups[j].save_match(new_match_1);
+
+    //                                 if (!both_matches_per_round) //if we have already found some second field to use, we no longer search for another one
+    //                                     index_field_2 = get_free_conected_field(index_field_1);
+
+    //                                 //playing teams of second match of the round
+    //                                 index_team_A = matches[i][1][0];
+    //                                 index_team_B = matches[i][1][1];
+
+    //                                 //there is connected field but some match is alredy in it or it is not efficient to travel
+    //                                 if (index_field_2 == -1) {
+    //                                     referee_index = referees[i][1]; //we can use referee from non playing team(of the other group)
+    //                                     //second match of the round
+    //                                     Match new_match_2 = new Match(groups[j].teams[index_team_A],
+    //                                             groups[j].teams[index_team_B],
+    //                                             groups[referee_group].teams[referee_index],
+    //                                             fields[index_field_1].curr_time,
+    //                                             match_t, fields[index_field_1]);
+
+    //                                     fields[index_field_1].add_match(new_match_2);
+    //                                     groups[j].save_match(new_match_2);
+    //                                     both_matches_per_round = false;
+    //                                 } else { //there is another field that we shall use
+    //                                     referee_index = referees[i][1]; //we can use referee from non playing team(of the other group)
+
+    //                                     Match new_match_2 = new Match(groups[j].teams[index_team_A],
+    //                                             groups[j].teams[index_team_B],
+    //                                             groups[referee_group].teams[referee_index], new_match_1.start, match_t, //we must start at the same time as new_match_1 to avoid problems
+    //                                             fields[index_field_2]);
+
+    //                                     fields[index_field_2].add_match(new_match_2);
+    //                                     groups[j].save_match(new_match_2);
+    //                                     both_matches_per_round = true;
+    //                                 }
+    //                             }
+    //                         }
+    //                     } else { //there is none connected field with fields[index_field_1], after each match we play the one from other group(so teams do not need pause)
+    //                         for (int i = 0; i < num_rounds; i++) {
+    //                             for (int j = 0; j < 2; j++) {
+    //                                 for (int k = 0; k < teams_size.length; k++) { //we do one match from the one group, then from the other
+    //                                     index_team_A = matches[i][j][0];
+    //                                     index_team_B = matches[i][j][1];
+    //                                     referee_index = referees[i][j]; //we can use referee from non playing team
+    //                                     Match new_match = new Match(groups[k].teams[index_team_A],
+    //                                             groups[k].teams[index_team_B],
+    //                                             groups[k].teams[referee_index],
+    //                                             fields[index_field_1].curr_time,
+    //                                             match_t, fields[index_field_1]);
+
+    //                                     fields[index_field_1].add_match(new_match);
+    //                                     groups[k].save_match(new_match);
+    //                                 }
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //             } //one group has 3 teams, the other has 4 teams. For bigger group the matches will be played in the same way as if
+    //             //bigger group would be alone in category but after every round there will be played one match from smaller group
+    //             else if ((teams_size[0] == 3 || teams_size[0] == 4) && (teams_size[1] == 3 || teams_size[1] == 4)) {   
+    //                 int small_g = teams_size[0] < teams_size[1] ? 0 : 1; //index of group with smaller size of teams (3)
+    //                 int big_g = small_g == 0 ? 1 : 0; //index of group with bigger size of teams (4) 
+
+    //                 index_field_1 = get_free_field();
+
+    //                 //3d array, first [] is for round, second [] is for 1st or 2nd match in that round, 3rd [] is for team_A at index 0 and team_B at index 1
+    //                 matches = new int[][][] { { { 0, 3 }, { 1, 2 } }, { { 3, 2 }, { 0, 1 } },
+    //                 { { 1, 3 }, { 2, 0 } } };
+    //                 referees = new int[][] { { 0, 1 }, { 1, 2 }, { 0, 2 } }; //array holding information of index of referee team for each match(we always use referee from other group)
+    //                 int num_rounds = 3;
+
+    //                 //there is some connected field that we might use
+    //                 if (!is_conected_field(index_field_1)) {
+    //                     both_matches_per_round = false;
+    //                     for (int i = 0; i < num_rounds; i++) { 
+    //                         //playing teams of first match of the round of the bigger group
+    //                         index_team_A = matches[i][0][0];
+    //                         index_team_B = matches[i][0][1];
+    //                         referee_index = referees[i][0];
+
+    //                         //first match of the round of the bigger group
+    //                         Match new_match_1 = new Match(groups[big_g].teams[index_team_A],
+    //                                 groups[big_g].teams[index_team_B],
+    //                                 groups[small_g].teams[referee_index], fields[index_field_1].curr_time,
+    //                                 match_t, fields[index_field_1]);
+
+    //                         fields[index_field_1].add_match(new_match_1);
+    //                         groups[big_g].save_match(new_match_1);
+
+    //                         if (!both_matches_per_round) //if we have already found some second field to use, we no longer search for another one
+    //                             index_field_2 = get_free_conected_field(index_field_1);
+
+    //                         //playing teams of second match of the round of the bigger group
+    //                         index_team_A = matches[i][1][0];
+    //                         index_team_B = matches[i][1][1];
+
+    //                         //there is connected field but some match is alredy in it or it is not efficient to travel
+    //                         if (index_field_2 == -1) {
+    //                             referee_index = referees[i][1];
+
+    //                             //second match of the round of the bigger group
+    //                             Match new_match_2 = new Match(groups[big_g].teams[index_team_A],
+    //                                     groups[big_g].teams[index_team_B],
+    //                                     groups[small_g].teams[referee_index],
+    //                                     fields[index_field_1].curr_time,
+    //                                     match_t, fields[index_field_1]);
+
+    //                             fields[index_field_1].add_match(new_match_2);
+    //                             groups[big_g].save_match(new_match_2);
+    //                             both_matches_per_round = false;
+    //                         } else { //there is another field that we shall use
+    //                             referee_index = referees[i][1]; //we can use referee from the other group     
+                                
+    //                             //second match of the round of the bigger group
+    //                             Match new_match_2 = new Match(groups[big_g].teams[index_team_A],
+    //                                     groups[big_g].teams[index_team_B],
+    //                                     groups[small_g].teams[referee_index], new_match_1.start, match_t, //we must start at the same time as new_match_1 to avoid problems
+    //                                     fields[index_field_2]);
+
+    //                             fields[index_field_2].add_match(new_match_2);
+    //                             groups[big_g].save_match(new_match_2);
+    //                             both_matches_per_round = true;
+    //                         }
+    //                         //after end of each round, we add one match from smaller group
+    //                         //we can use index_team_A, B and referee_index from previous new_match_2 because it is from the same berger tables and big group is not playing
+    //                         Match new_match_small = new Match(groups[small_g].teams[index_team_A],
+    //                                 groups[small_g].teams[index_team_B],
+    //                                 groups[big_g].teams[referee_index], fields[index_field_1].curr_time, match_t, 
+    //                                 fields[index_field_1]);
+
+    //                         fields[index_field_1].add_match(new_match_small);
+    //                         groups[small_g].save_match(new_match_small);
+    //                     }
+    //                 } else { //there is none connected field with fields[index_field_1], we must give teams rest after every second match (end of round)
+    //                     for (int i = 0; i < num_rounds; i++) {
+    //                         for (int j = 0; j < 2; j++) {
+    //                             index_team_A = matches[i][j][0];
+    //                             index_team_B = matches[i][j][1];
+    //                             referee_index = referees[i][j]; //we can use referee from other group
+    //                             Match new_match = new Match(groups[big_g].teams[index_team_A],
+    //                                     groups[big_g].teams[index_team_B],
+    //                                     groups[small_g].teams[referee_index],
+    //                                     fields[index_field_1].curr_time,
+    //                                     match_t, fields[index_field_1]);
+
+    //                             fields[index_field_1].add_match(new_match);
+    //                             groups[big_g].save_match(new_match);
+    //                         }
+    //                         //after end of each round, we add one match from smaller group
+    //                         referee_index = referees[i][0]; //we can use referee from other group
+    //                         index_team_A = matches[i][1][0];
+    //                         index_team_B = matches[i][1][1];
+    //                         Match new_match_small = new Match(groups[small_g].teams[index_team_A],
+    //                                 groups[small_g].teams[index_team_B],
+    //                                 groups[big_g].teams[referee_index], fields[index_field_1].curr_time, match_t, 
+    //                                 fields[index_field_1]);
+
+    //                         fields[index_field_1].add_match(new_match_small);
+    //                         groups[small_g].save_match(new_match_small);
+    //                     }
+    //                 }    
+    //             } //one group has 5 teams and the other 4 teams, if we can access 2 fields we shall play both matches from round
+    //               //of the bigger group and then both matches of the smaller group and we will have to have pause before the last round.
+    //               //If we have access to only one field, then we go with one match from smaller group and 2 matches from bigger group
+    //             else if ((teams_size[0] == 4 || teams_size[0] == 5) && (teams_size[1] == 4 || teams_size[1] == 5)) {
+    //                 int small_g = teams_size[0] < teams_size[1] ? 0 : 1; //index of group with smaller size of teams (3)
+    //                 int big_g = small_g == 0 ? 1 : 0; //index of group with bigger size of teams (4) 
+    //                 int index_match_small = 0; //index of match of the current round for smaller group(0 or 1)
+    //                 int index_round_small = 0;
+
+    //                 index_field_1 = get_free_field();
+    //                 //3d array, first [] is for round, second [] is for 1st or 2nd match in that round, 3rd [] is for team_A at index 0 and team_B at index 1
+    //                 int[][][] matches_s = new int[][][] { { { 0, 3 }, { 1, 2 } }, { { 3, 2 }, { 0, 1 } },
+    //                         { { 1, 3 }, { 2, 0 } } }; //matches of the smaller group
+    //                 int[][] referees_s = new int[][] { { 1, 3 }, { 0, 2 }, { 4, 1 } }; //array holding information of index of referee team for each match for the smaller group, we will use referee from the bigger group
+
+    //                 int[][][] matches_b = new int[][][] { { { 1, 4 }, { 2, 3 } }, { { 4, 2 }, { 0, 1 } },
+    //                         { { 2, 0 }, { 3, 4 } }, { { 0, 3 }, { 1, 2 } },
+    //                         { { 3, 1 }, { 4, 0 } } }; //matches of the bigger group
+    //                 int[][] referees_b = new int[][] { { 0, 0 }, { 3, 3 }, { 1, 1 }, { 4, 4 }, { 2, 2 } }; //array holding information of index of referee team for each match for the bigger group, we will use referee from team, that is not playing
+    //                 int num_rounds = 5;
+    //                 both_matches_per_round = false;
+    //                 boolean finished_s_g = false; //variable signaling that all matches from smaller group are created
+
+    //                 //I have to find out if there is 2 field that we might use
+    //                 int curr_time_field_1 = fields[index_field_1].curr_time;
+    //                 fields[index_field_1].curr_time += match_t + groups[0].teams[0].time_to_prepare;
+    //                 int index_field_2_check = get_free_conected_field(index_field_1);
+    //                 fields[index_field_1].curr_time = curr_time_field_1; //loads back curr_time 
+
+    //                 if (index_field_2_check != -1) { //for the first round we can use 2 fields and we start with matches from bigger group
+    //                     index_field_2 = index_field_2_check;
+    //                     both_matches_per_round = true;
+    //                 } else { //for the first round we can use only 1 field so we start with match from smaller group
+    //                     index_team_A = matches_s[index_round_small][index_match_small][0];
+    //                     index_team_B = matches_s[index_round_small][index_match_small][1];
+    //                     referee_index = referees_s[index_round_small][index_match_small];
+    //                     Match new_match_small = new Match(groups[small_g].teams[index_team_A],
+    //                             groups[small_g].teams[index_team_B],
+    //                             groups[big_g].teams[referee_index],
+    //                             fields[index_field_1].curr_time,
+    //                             match_t, fields[index_field_1]);
+    //                     fields[index_field_1].add_match(new_match_small);
+    //                     groups[small_g].save_match(new_match_small);
+    //                     index_match_small = 1;
+    //                 }
+
+    //                 //there is some connected field that we might use
+    //                 if (!is_conected_field(index_field_1)) {
+    //                     int[] match_rest = { 0, 0 }; //we do not yet know if before last round shall be needed pause
+    //                     for (int i = 0; i < num_rounds; i++) {
+    //                         //playing teams of first match of the round of the bigger group
+    //                         index_team_A = matches_b[i][0][0];
+    //                         index_team_B = matches_b[i][0][1];
+    //                         referee_index = referees_b[i][0];
+
+    //                         //first match of the round
+    //                         Match new_match_1 = new Match(groups[big_g].teams[index_team_A],
+    //                                 groups[big_g].teams[index_team_B],
+    //                                 groups[big_g].teams[referee_index], fields[index_field_1].curr_time + match_rest[0],
+    //                                 match_t, fields[index_field_1]);
+
+    //                         fields[index_field_1].add_match(new_match_1);
+    //                         groups[big_g].save_match(new_match_1);
+
+    //                         if (!both_matches_per_round) //if we have already found some second field to use, we no longer search for another one
+    //                             index_field_2 = get_free_conected_field(index_field_1);
+
+    //                         //playing teams of second match of the round
+    //                         index_team_A = matches_b[i][1][0];
+    //                         index_team_B = matches_b[i][1][1];
+
+    //                         //there is connected field but some match is alredy in it or it is not efficient to travel
+    //                         if (index_field_2 == -1) {
+    //                             referee_index = referees_b[i][1];
+    //                             Match new_match_2 = new Match(groups[big_g].teams[index_team_A],
+    //                                     groups[big_g].teams[index_team_B],
+    //                                     groups[big_g].teams[referee_index],
+    //                                     fields[index_field_1].curr_time + match_rest[1],
+    //                                     match_t, fields[index_field_1]);
+
+    //                             fields[index_field_1].add_match(new_match_2);
+    //                             groups[big_g].save_match(new_match_2);
+    //                             both_matches_per_round = false;
+
+    //                             //we create one match from smaller group
+    //                             referee_index = referees_s[index_round_small][index_match_small];
+    //                             int index_team_A_s = matches_s[index_round_small][index_match_small][0];
+    //                             int index_team_B_s = matches_s[index_round_small][index_match_small][1];
+    //                             Match new_match_small = new Match(groups[small_g].teams[index_team_A_s],
+    //                                     groups[small_g].teams[index_team_B_s],
+    //                                     groups[big_g].teams[referee_index],
+    //                                     fields[index_field_1].curr_time,
+    //                                     match_t, fields[index_field_1]);
+
+    //                             fields[index_field_1].add_match(new_match_small);
+    //                             groups[small_g].save_match(new_match_small);
+
+    //                             //we set indexis to get next match
+    //                             if (index_match_small == 1) {
+    //                                 index_match_small = 0;
+    //                                 index_round_small += 1;
+    //                             } else
+    //                                 index_match_small = 1;
+    //                         } else { //there is another field that we shall use
+    //                             referee_index = referees_b[i][1]; //we can use referee from non playing team
+
+    //                             Match new_match_2 = new Match(groups[big_g].teams[index_team_A],
+    //                                     groups[big_g].teams[index_team_B],
+    //                                     groups[big_g].teams[referee_index], new_match_1.start, match_t, //we must start at the same time as new_match_1 to avoid problems
+    //                                     fields[index_field_2]);
+
+    //                             fields[index_field_2].add_match(new_match_2);
+    //                             groups[big_g].save_match(new_match_2);
+    //                             both_matches_per_round = true;
+
+    //                             if (finished_s_g) { //if round before all matches were created for smaller group, we need to have rest before next matches(if they are any left)
+    //                                 match_rest[0] = rest_t;
+    //                                 match_rest[1] = rest_t;
+    //                             }
+    //                             //we finish current round for the smaller group(either it takes 2 or 1 match) (if all rounds were not already played)
+    //                             if (index_round_small < 3) {
+    //                                 for (int j = index_match_small; j < 2; j++) {
+    //                                     referee_index = referees_s[index_round_small][j];
+    //                                     int index_team_A_s = matches_s[index_round_small][j][0];
+    //                                     int index_team_B_s = matches_s[index_round_small][j][1];
+    //                                     int index_field_small = j == 0 ? index_field_1 : index_field_2;
+    //                                     Match new_match_small = new Match(groups[small_g].teams[index_team_A_s],
+    //                                             groups[small_g].teams[index_team_B_s],
+    //                                             groups[big_g].teams[referee_index],
+    //                                             fields[index_field_small].curr_time,
+    //                                             match_t, fields[index_field_small]);
+
+    //                                     fields[index_field_small].add_match(new_match_small);
+    //                                     groups[small_g].save_match(new_match_small);
+    //                                 }
+    //                                 index_round_small += 1;
+    //                                 if (index_round_small == 3) //all matches were created for the smaller group
+    //                                     finished_s_g = true;
+    //                             }
+
+    //                         }
+    //                     }
+    //                 } else { //there is none connected field with fields[index_field_1], we play both matches from bigger group and then one from smaller
+    //                     for (int i = 0; i < num_rounds; i++) {
+    //                         for (int j = 0; j < 2; j++) {
+    //                             index_team_A = matches_b[i][j][0];
+    //                             index_team_B = matches_b[i][j][1];
+    //                             referee_index = referees_b[i][j]; //we can use referee from non playing team
+    //                             Match new_match = new Match(groups[big_g].teams[index_team_A],
+    //                                     groups[big_g].teams[index_team_B],
+    //                                     groups[big_g].teams[referee_index],
+    //                                     fields[index_field_1].curr_time,
+    //                                     match_t, fields[index_field_1]);
+
+    //                             fields[index_field_1].add_match(new_match);
+    //                             groups[big_g].save_match(new_match);
+    //                         }
+    //                         //after end of each round we create match for smaller group
+    //                         referee_index = referees_s[index_round_small][index_match_small];
+    //                         int index_team_A_s = matches_s[index_round_small][index_match_small][0];
+    //                         int index_team_B_s = matches_s[index_round_small][index_match_small][1];
+    //                         Match new_match_small = new Match(groups[small_g].teams[index_team_A_s],
+    //                                 groups[small_g].teams[index_team_B_s],
+    //                                 groups[big_g].teams[referee_index],
+    //                                 fields[index_field_1].curr_time,
+    //                                 match_t, fields[index_field_1]);
+
+    //                         fields[index_field_1].add_match(new_match_small);
+    //                         groups[small_g].save_match(new_match_small);
+    //                     }
+    //                 }
+    //             }
+    //             break;
+    //         case 3:
+    //             //all groups have the same amount of teams, we approach this similary as in case for 2 groups with same number of teams
+    //             //we start with round of first group, then do round of second and then of the third, possibly using 2 fields 
+    //             if (teams_size[0] == teams_size[1] && teams_size[1] == teams_size[2]) {
+    //                 team_size = teams_size[0];
+    //                 //we shall use 1 field and instead of having rest after each match, we do one match from group_0, then one match from group_1, then one match from group_2 and repeat
+    //                 if (teams_size[0] == 3) {
+    //                     index_field_1 = get_free_field();
+    //                     for (int i = 0; i < team_size; i++) {
+    //                         for (int j = 0; j < team_size; j++) {
+    //                             if (j > i) {
+    //                                 for (int k = 0; k < team_size; k++) {
+    //                                     if (k != i && k != j) {
+    //                                         referee_index = k;
+    //                                         break;
+    //                                     }
+    //                                 }
+    //                                 //match for 1st 2nd and 3rd group for current round
+    //                                 for (int k = 0; k < teams_size.length; k++) {
+    //                                     Match new_match = new Match(groups[k].teams[i], groups[k].teams[j],
+    //                                             groups[k].teams[referee_index],
+    //                                             fields[index_field_1].curr_time, match_t, fields[index_field_1]);
+                                            
+    //                                     fields[index_field_1].add_match(new_match);
+    //                                     groups[k].save_match(new_match);
+    //                                 }
+    //                             }
+    //                         }
+    //                     }
+    //                 } //for teams_size 4 or 5 the algorithm is very similar, we use either 1 field and for each round we first create matches from 
+    //                   //1st group and after that from the 2nd and after that for the 3rd group so we do not need to have pause after each round, 
+    //                   //or we use 2 fields and we create both matches of each round at the same time and then both matches from different group
+    //                 else {
+    //                     index_field_1 = get_free_field();
+    //                     int num_rounds = -1;
+    //                     //3d array, first [] is for round, second [] is for 1st or 2nd match in that round, 3rd [] is for team_A at index 0 and team_B at index 1
+    //                     if (team_size == 4) {
+    //                         matches = new int[][][] { { { 0, 3 }, { 1, 2 } }, { { 3, 2 }, { 0, 1 } },
+    //                                 { { 1, 3 }, { 2, 0 } } };
+    //                         referees = new int[][] { { 1, 3 }, { 0, 2 }, { 0, 1 } }; //array holding information of index of referee team for each match
+    //                         num_rounds = 3;
+    //                     } else { //num_teams == 5 
+    //                         matches = new int[][][] { { { 1, 4 }, { 2, 3 } }, { { 4, 2 }, { 0, 1 } },
+    //                                 { { 2, 0 }, { 3, 4 } }, { { 0, 3 }, { 1, 2 } }, { { 3, 1 }, { 4, 0 } } };
+    //                         referees = new int[][] { { 0, 0 }, { 3, 3 }, { 1, 1 }, { 4, 4 }, { 2, 2 } }; //array holding information of index of referee team for each match
+    //                         num_rounds = 5;
+    //                     }
+
+    //                     //there is some connected field that we might use
+    //                     if (!is_conected_field(index_field_1)) {
+    //                         both_matches_per_round = false;
+    //                         for (int i = 0; i < num_rounds; i++) {
+    //                             for (int j = 0; j < teams_size.length; j++) {
+    //                                 //playing teams of first match of the round
+    //                                 index_team_A = matches[i][0][0];
+    //                                 index_team_B = matches[i][0][1];
+    //                                 referee_index = referees[i][0]; //we will use referee from the next group so he will be always avaible
+    //                                 int referee_group = j == 2 ? 0 : ++j;
+    //                                 //first match of the round
+    //                                 Match new_match_1 = new Match(groups[j].teams[index_team_A],
+    //                                         groups[j].teams[index_team_B],
+    //                                         groups[referee_group].teams[referee_index], fields[index_field_1].curr_time,
+    //                                         match_t, fields[index_field_1]);
+
+    //                                 fields[index_field_1].add_match(new_match_1);
+    //                                 groups[j].save_match(new_match_1);
+
+    //                                 if (!both_matches_per_round) //if we have already found some second field to use, we no longer search for another one
+    //                                     index_field_2 = get_free_conected_field(index_field_1);
+
+    //                                 //playing teams of second match of the round
+    //                                 index_team_A = matches[i][1][0];
+    //                                 index_team_B = matches[i][1][1];
+
+    //                                 //there is connected field but some match is alredy in it or it is not efficient to travel
+    //                                 if (index_field_2 == -1) {
+    //                                     referee_index = referees[i][1]; //we can use referee from non playing team(of the other group)
+    //                                     //second match of the round
+    //                                     Match new_match_2 = new Match(groups[j].teams[index_team_A],
+    //                                             groups[j].teams[index_team_B],
+    //                                             groups[referee_group].teams[referee_index],
+    //                                             fields[index_field_1].curr_time,
+    //                                             match_t, fields[index_field_1]);
+
+    //                                     fields[index_field_1].add_match(new_match_2);
+    //                                     groups[j].save_match(new_match_2);
+    //                                     both_matches_per_round = false;
+    //                                 } else { //there is another field that we shall use
+    //                                     referee_index = referees[i][1]; //we can use referee from non playing team(of the other group)
+
+    //                                     Match new_match_2 = new Match(groups[j].teams[index_team_A],
+    //                                             groups[j].teams[index_team_B],
+    //                                             groups[referee_group].teams[referee_index], new_match_1.start, match_t, //we must start at the same time as new_match_1 to avoid problems
+    //                                             fields[index_field_2]);
+
+    //                                     fields[index_field_2].add_match(new_match_2);
+    //                                     groups[j].save_match(new_match_2);
+    //                                     both_matches_per_round = true;
+    //                                 }
+    //                             }
+    //                         }
+    //                     } else { //there is none connected field with fields[index_field_1], after each match we play the one from other group(so teams do not need pause)
+    //                         for (int i = 0; i < num_rounds; i++) {
+    //                             for (int j = 0; j < 2; j++) {
+    //                                 for (int k = 0; k < teams_size.length; k++) { //we do one match from the one group, then from the next group
+    //                                     index_team_A = matches[i][j][0];
+    //                                     index_team_B = matches[i][j][1];
+    //                                     referee_index = referees[i][j]; //we can use referee from non playing team
+    //                                     Match new_match = new Match(groups[k].teams[index_team_A],
+    //                                             groups[k].teams[index_team_B],
+    //                                             groups[k].teams[referee_index],
+    //                                             fields[index_field_1].curr_time,
+    //                                             match_t, fields[index_field_1]);
+
+    //                                     fields[index_field_1].add_match(new_match);
+    //                                     groups[k].save_match(new_match);
+    //                                 }
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //             } //groups have 3 teams or 4 teams
+    //             else if ((teams_size[0] == 3 || teams_size[0] == 4) && (teams_size[1] == 3 || teams_size[1] == 4)
+    //                     && (teams_size[2] == 3 || teams_size[2] == 4)) {
+    //                 //finding out which groups are with teams size 4 or 3
+    //                 int[] indexes_small_g = new int[2]; //indexes of the smaller group/groups
+    //                 int[] indexes_big_g = new int[2]; //indexes of the bigger group/groups
+    //                 int number_bigger_g = 0; //number of bigger groups
+    //                 for (int i = 0; i < teams_size.length; i++) {
+    //                     if (teams_size[i] == 4) {
+    //                         indexes_big_g[number_bigger_g] = i;
+    //                         number_bigger_g++;
+    //                     } else
+    //                         indexes_small_g[i - number_bigger_g] = i;
+    //                 }
+    //                 indexes_small_g = Arrays.copyOf(indexes_small_g, 3 - number_bigger_g);
+    //                 indexes_big_g = Arrays.copyOf(indexes_big_g, number_bigger_g);
+
+    //                 index_field_1 = get_free_field();
+
+    //                 //3d array, first [] is for round, second [] is for 1st or 2nd match in that round, 3rd [] is for team_A at index 0 and team_B at index 1
+    //                 matches = new int[][][] { { { 0, 3 }, { 1, 2 } }, { { 3, 2 }, { 0, 1 } },
+    //                         { { 1, 3 }, { 2, 0 } } };
+    //                 referees = new int[][] { { 0, 1 }, { 1, 2 }, { 0, 2 } }; //array holding information of index of referee team for each match(we always use referee from other group)
+    //                 int num_rounds = 3;
+
+    //                 //there is some connected field that we might use
+    //                 if (!is_conected_field(index_field_1)) {
+    //                     int curr_index_field = index_field_1; //if we can use 2 fields and we have 2 groups with 4 teams, we need this variable to rightly create new matches
+    //                     int curr_match_start = fields[curr_index_field].curr_time; //we also might need to set start of the match in different way
+
+    //                     both_matches_per_round = false;
+    //                     for (int i = 0; i < num_rounds; i++) {
+    //                         //playing teams of first match of the round of the bigger group
+    //                         index_team_A = matches[i][0][0];
+    //                         index_team_B = matches[i][0][1];
+    //                         referee_index = referees[i][0]; //we can use referee from the smaller group
+
+    //                         //first we play both matches from the round of the bigger group/groups
+    //                         for (int j = 0; j < number_bigger_g; j++) {
+    //                             //first match of the round of the current bigger group
+    //                             Match new_match_1 = new Match(groups[indexes_big_g[j]].teams[index_team_A],
+    //                                     groups[indexes_big_g[j]].teams[index_team_B],
+    //                                     groups[indexes_small_g[0]].teams[referee_index], curr_match_start,
+    //                                     match_t, fields[curr_index_field]);
+
+    //                             fields[curr_index_field].add_match(new_match_1);
+    //                             groups[indexes_big_g[j]].save_match(new_match_1);
+
+    //                             if (!both_matches_per_round) //if we have already found some second field to use, we no longer search for another one
+    //                                 index_field_2 = get_free_conected_field(index_field_1);
+
+    //                             //playing teams of second match of the round of the current bigger group
+    //                             index_team_A = matches[i][1][0];
+    //                             index_team_B = matches[i][1][1];
+
+    //                             //there is connected field but some match is alredy in it or it is not efficient to travel
+    //                             if (index_field_2 == -1) {
+    //                                 referee_index = referees[i][1];
+
+    //                                 //second match of the round of the current bigger group
+    //                                 Match new_match_2 = new Match(groups[indexes_big_g[j]].teams[index_team_A],
+    //                                         groups[indexes_big_g[j]].teams[index_team_B],
+    //                                         groups[indexes_small_g[0]].teams[referee_index],
+    //                                         fields[index_field_1].curr_time,
+    //                                         match_t, fields[index_field_1]);
+
+    //                                 fields[index_field_1].add_match(new_match_2);
+    //                                 groups[indexes_big_g[j]].save_match(new_match_2);
+    //                                 both_matches_per_round = false;
+
+    //                                 curr_match_start = fields[curr_index_field].curr_time;
+    //                             } else { //there is another field that we shall use
+    //                                 referee_index = referees[i][1]; //we can use referee from the smaller group  
+
+    //                                 //handling at which field next match should be played and when
+    //                                 if (curr_index_field == index_field_1) {
+    //                                     curr_index_field = index_field_2;
+    //                                     curr_match_start = new_match_1.start;
+    //                                 } else {
+    //                                     curr_index_field = index_field_1;
+    //                                     curr_match_start = fields[curr_index_field].curr_time;
+    //                                 }
+
+    //                                 //second match of the round of the bigger group
+    //                                 Match new_match_2 = new Match(groups[indexes_big_g[j]].teams[index_team_A],
+    //                                         groups[indexes_big_g[j]].teams[index_team_B],
+    //                                         groups[indexes_small_g[j]].teams[referee_index], new_match_1.start, match_t, //we must start at the same time as new_match_1 to avoid problems
+    //                                         fields[index_field_2]);
+
+    //                                 fields[index_field_2].add_match(new_match_2);
+    //                                 groups[indexes_big_g[j]].save_match(new_match_2);
+    //                                 both_matches_per_round = true;
+
+    //                                 if (curr_index_field == index_field_1) {
+    //                                     curr_index_field = index_field_2;
+    //                                     curr_match_start = new_match_1.start;
+    //                                 } else {
+    //                                     curr_index_field = index_field_1;
+    //                                     curr_match_start = fields[curr_index_field].curr_time;
+    //                                 }
+    //                             }
+    //                             //after end of each round, we add one match from smaller group/groups
+    //                             //we can use index_team_A, B and referee_index from previous new_match_2 because it is from the same berger tables and big group is not playing
+    //                             for (int k = 0; k < indexes_small_g.length; k++) {
+
+    //                                 Match new_match_small = new Match(groups[indexes_small_g[k]].teams[index_team_A],
+    //                                         groups[indexes_small_g[k]].teams[index_team_B],
+    //                                         groups[indexes_big_g[0]].teams[referee_index], curr_match_start, match_t,
+    //                                         fields[curr_index_field]);
+
+    //                                 fields[curr_index_field].add_match(new_match_small);
+    //                                 groups[indexes_small_g[k]].save_match(new_match_small);
+    //                             }
+    //                             if (both_matches_per_round) {
+    //                                 if (curr_index_field == index_field_1) {
+    //                                     curr_index_field = index_field_2;
+    //                                     curr_match_start = new_match_1.start;
+    //                                 } else {
+    //                                     curr_index_field = index_field_1;
+    //                                     curr_match_start = fields[curr_index_field].curr_time;
+    //                                 }
+    //                             } else
+    //                                 curr_match_start = fields[curr_index_field].curr_time;
+    //                         }
+    //                     }
+    //                 } else { //there is none connected field with fields[index_field_1], we must give teams rest after every second match (end of round)
+    //                     for (int i = 0; i < num_rounds; i++) {
+    //                         for (int k = 0; k < indexes_big_g.length; k++) { //for each round we start with bigger group/groups
+    //                             for (int j = 0; j < 2; j++) {
+    //                                 index_team_A = matches[i][j][0];
+    //                                 index_team_B = matches[i][j][1];
+    //                                 referee_index = referees[i][j]; //we can use referee from other group
+    //                                 Match new_match = new Match(groups[indexes_big_g[k]].teams[index_team_A],
+    //                                         groups[indexes_big_g[k]].teams[index_team_B],
+    //                                         groups[indexes_small_g[0]].teams[referee_index],
+    //                                         fields[index_field_1].curr_time,
+    //                                         match_t, fields[index_field_1]);
+
+    //                                 fields[index_field_1].add_match(new_match);
+    //                                 groups[indexes_big_g[k]].save_match(new_match);
+    //                             }
+    //                         }
+    //                         for (int k = 0; k < (3 - indexes_big_g.length); k++) { //after bigger group/groups have played we create match for smaller group/groups
+    //                             for (int j = 0; j < 2; j++) {
+    //                                 index_team_A = matches[i][j][0];
+    //                                 index_team_B = matches[i][j][1];
+    //                                 referee_index = referees[i][j]; //we can use referee from other group
+    //                                 Match new_match = new Match(groups[indexes_small_g[k]].teams[index_team_A],
+    //                                         groups[indexes_small_g[k]].teams[index_team_B],
+    //                                         groups[indexes_big_g[0]].teams[referee_index],
+    //                                         fields[index_field_1].curr_time,
+    //                                         match_t, fields[index_field_1]);
+
+    //                                 fields[index_field_1].add_match(new_match);
+    //                                 groups[indexes_small_g[k]].save_match(new_match);
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //             } //groups have 4 or 5 teams
+    //             else if ((teams_size[0] == 5 || teams_size[0] == 4) && (teams_size[1] == 5 || teams_size[1] == 4)
+    //                     && (teams_size[2] == 5 || teams_size[2] == 4)) {
+    //                 //finding out which groups are with teams size 4 or 5
+    //                 int[] indexes_small_g = new int[2]; //indexes of the smaller group/groups
+    //                 int[] indexes_big_g = new int[2]; //indexes of the bigger group/groups
+    //                 int number_bigger_g = 0; //number of bigger groups
+    //                 for (int i = 0; i < teams_size.length; i++) {
+    //                     if (teams_size[i] == 5) {
+    //                         indexes_big_g[number_bigger_g] = i;
+    //                         number_bigger_g++;
+    //                     } else
+    //                         indexes_small_g[i - number_bigger_g] = i;
+    //                 }
+    //                 indexes_small_g = Arrays.copyOf(indexes_small_g, 3 - number_bigger_g);
+    //                 indexes_big_g = Arrays.copyOf(indexes_big_g, number_bigger_g);
+
+    //                 index_field_1 = get_free_field();
+
+    //                 //3d array, first [] is for round, second [] is for 1st or 2nd match in that round, 3rd [] is for team_A at index 0 and team_B at index 1
+    //                 int[][][] matches_s = new int[][][] { { { 0, 3 }, { 1, 2 } }, { { 3, 2 }, { 0, 1 } },
+    //                         { { 1, 3 }, { 2, 0 } } }; //matches of the smaller group
+    //                 int[][] referees_s = new int[][] { { 1, 3 }, { 0, 2 }, { 4, 1 } }; //array holding information of index of referee team for each match for the smaller group, we will use referee from the bigger group
+
+    //                 int[][][] matches_b = new int[][][] { { { 0, 1 }, { 2, 3 } }, { { 0, 4 }, { 1, 3 } }, //int this way none team plays two matches after each other
+    //                         { { 2, 4 }, { 0, 3 } }, { { 1, 4 }, { 0, 2 } }, { { 3, 4 }, { 1, 2 } } };
+    //                 int[][] referees_b = new int[][] { { 0, 0 }, { 3, 3 }, { 1, 1 }, { 4, 4 }, { 2, 2 } }; //array holding information of index of referee team for each match for the bigger group, we will use referee from team, that is not playing
+    //                 int num_rounds = 5;
+
+    //                 both_matches_per_round = false;
+    //                 int small_g_round = 0; //current round of the smaller group/groups
+    //                 int small_g_index = indexes_small_g[0]; //index of the smaller group for what we are going to create matches
+
+    //                 //there is some connected field that we might use
+    //                 if (!is_conected_field(index_field_1)) {
+    //                     //at the start we play one round for the smaller group
+    //                     index_team_A = matches_b[small_g_round][0][0];
+    //                     index_team_B = matches_b[small_g_round][0][1];
+    //                     referee_index = referees_s[small_g_round][0];
+
+    //                     //first match of the round
+    //                     Match new_match_s_1 = new Match(groups[small_g_index].teams[index_team_A],
+    //                             groups[small_g_index].teams[index_team_B],
+    //                             groups[indexes_big_g[0]].teams[referee_index],
+    //                             fields[index_field_1].curr_time,
+    //                             match_t, fields[index_field_1]);
+
+    //                     fields[index_field_1].add_match(new_match_s_1);
+    //                     groups[small_g_index].save_match(new_match_s_1);
+
+    //                     if (!both_matches_per_round) //if we have already found some second field to use, we no longer search for another one
+    //                         index_field_2 = get_free_conected_field(index_field_1);
+
+    //                     //playing teams of second match of the round
+    //                     index_team_A = matches_b[small_g_round][1][0];
+    //                     index_team_B = matches_b[small_g_round][1][1];
+
+    //                     //there is connected field but some match is alredy in it or it is not efficient to travel
+    //                     if (index_field_2 == -1) {
+    //                         referee_index = referees_s[small_g_round][0];
+    //                         Match new_match_s_2 = new Match(groups[small_g_index].teams[index_team_A],
+    //                                 groups[small_g_index].teams[index_team_B],
+    //                                 groups[indexes_big_g[0]].teams[referee_index],
+    //                                 fields[index_field_1].curr_time,
+    //                                 match_t, fields[index_field_1]);
+
+    //                         fields[index_field_1].add_match(new_match_s_2);
+    //                         groups[small_g_index].save_match(new_match_s_2);
+    //                         both_matches_per_round = false;
+    //                     } else { //there is another field that we shall use
+    //                         referee_index = referees_s[small_g_round][1]; //we can use referee from non playing team
+
+    //                         Match new_match_2 = new Match(groups[small_g_index].teams[index_team_A],
+    //                                 groups[small_g_index].teams[index_team_B],
+    //                                 groups[indexes_big_g[0]].teams[referee_index], new_match_s_1.start, match_t, //we must start at the same time as new_match_1 to avoid problems
+    //                                 fields[index_field_2]);
+
+    //                         fields[index_field_2].add_match(new_match_2);
+    //                         groups[small_g_index].save_match(new_match_2);
+    //                         both_matches_per_round = true;
+    //                     }
+    //                     if (number_bigger_g == 1) {
+    //                         small_g_index = indexes_small_g[1];
+    //                     } else {
+    //                         small_g_round++;
+    //                     }
+    //                     for (int i = 0; i < num_rounds; i++) {
+    //                         for (int j = 0; j < number_bigger_g; j++) { //now we play both matches of the current round for the bigger group/groups
+    //                             //playing teams of first match of the round of the bigger group
+    //                             index_team_A = matches_b[i][0][0];
+    //                             index_team_B = matches_b[i][0][1];
+    //                             referee_index = referees_b[i][0];
+
+    //                             //first match of the round
+    //                             Match new_match_1 = new Match(groups[indexes_big_g[j]].teams[index_team_A],
+    //                                     groups[indexes_big_g[j]].teams[index_team_B],
+    //                                     groups[indexes_small_g[0]].teams[referee_index],
+    //                                     fields[index_field_1].curr_time,
+    //                                     match_t, fields[index_field_1]);
+
+    //                             fields[index_field_1].add_match(new_match_1);
+    //                             groups[indexes_big_g[j]].save_match(new_match_1);
+
+    //                             if (!both_matches_per_round) //if we have already found some second field to use, we no longer search for another one
+    //                                 index_field_2 = get_free_conected_field(index_field_1);
+
+    //                             //playing teams of second match of the round
+    //                             index_team_A = matches_b[i][1][0];
+    //                             index_team_B = matches_b[i][1][1];
+
+    //                             //there is connected field but some match is alredy in it or it is not efficient to travel
+    //                             if (index_field_2 == -1) {
+    //                                 referee_index = referees_b[i][1];
+    //                                 Match new_match_2 = new Match(groups[indexes_big_g[j]].teams[index_team_A],
+    //                                         groups[indexes_big_g[j]].teams[index_team_B],
+    //                                         groups[indexes_small_g[0]].teams[referee_index],
+    //                                         fields[index_field_1].curr_time,
+    //                                         match_t, fields[index_field_1]);
+
+    //                                 fields[index_field_1].add_match(new_match_2);
+    //                                 groups[indexes_big_g[j]].save_match(new_match_2);
+    //                                 both_matches_per_round = false;
+    //                             } else { //there is another field that we shall use
+    //                                 referee_index = referees_b[i][1]; //we can use referee from non playing team
+
+    //                                 Match new_match_2 = new Match(groups[indexes_big_g[j]].teams[index_team_A],
+    //                                         groups[indexes_big_g[j]].teams[index_team_B],
+    //                                         groups[indexes_small_g[0]].teams[referee_index], new_match_1.start, match_t, //we must start at the same time as new_match_1 to avoid problems
+    //                                         fields[index_field_2]);
+
+    //                                 fields[index_field_2].add_match(new_match_2);
+    //                                 groups[indexes_big_g[j]].save_match(new_match_2);
+    //                                 both_matches_per_round = true;
+    //                             }
+    //                         }
+    //                         //now we play one round for the smaller group/groups if there is some to play
+    //                         if (small_g_round < 3) {
+    //                             index_team_A = matches_s[small_g_round][0][0];
+    //                             index_team_B = matches_s[small_g_round][0][1];
+    //                             referee_index = referees_s[small_g_round][0];
+
+    //                             //first match of the round
+    //                             Match new_match_1 = new Match(groups[small_g_index].teams[index_team_A],
+    //                                     groups[small_g_index].teams[index_team_B],
+    //                                     groups[indexes_big_g[0]].teams[referee_index],
+    //                                     fields[index_field_1].curr_time,
+    //                                     match_t, fields[index_field_1]);
+
+    //                             fields[index_field_1].add_match(new_match_1);
+    //                             groups[small_g_index].save_match(new_match_1);
+
+    //                             if (!both_matches_per_round) //if we have already found some second field to use, we no longer search for another one
+    //                                 index_field_2 = get_free_conected_field(index_field_1);
+
+    //                             //playing teams of second match of the round
+    //                             index_team_A = matches_s[small_g_round][1][0];
+    //                             index_team_B = matches_s[small_g_round][1][1];
+
+    //                             //there is connected field but some match is alredy in it or it is not efficient to travel
+    //                             if (index_field_2 == -1) {
+    //                                 referee_index = referees_s[small_g_round][1];
+    //                                 Match new_match_2 = new Match(groups[small_g_index].teams[index_team_A],
+    //                                         groups[small_g_index].teams[index_team_B],
+    //                                         groups[indexes_big_g[0]].teams[referee_index],
+    //                                         fields[index_field_1].curr_time,
+    //                                         match_t, fields[index_field_1]);
+
+    //                                 fields[index_field_1].add_match(new_match_2);
+    //                                 groups[small_g_index].save_match(new_match_2);
+    //                                 both_matches_per_round = false;
+    //                             } else { //there is another field that we shall use
+    //                                 referee_index = referees_s[small_g_round][1]; //we can use referee from non playing team
+
+    //                                 Match new_match_2 = new Match(groups[small_g_index].teams[index_team_A],
+    //                                         groups[small_g_index].teams[index_team_B],
+    //                                         groups[indexes_big_g[0]].teams[referee_index], new_match_1.start,
+    //                                         match_t, //we must start at the same time as new_match_1 to avoid problems
+    //                                         fields[index_field_2]);
+
+    //                                 fields[index_field_2].add_match(new_match_2);
+    //                                 groups[small_g_index].save_match(new_match_2);
+    //                                 both_matches_per_round = true;
+    //                             }
+    //                             if (number_bigger_g == 1) {
+    //                                 if (small_g_index == indexes_small_g[1]) {
+    //                                     small_g_index = indexes_small_g[0];
+    //                                     small_g_round++;
+    //                                 } else {
+    //                                     small_g_index = indexes_small_g[1];
+    //                                 }
+    //                             } else {
+    //                                 small_g_round++;
+    //                             }
+    //                         }
+    //                     }
+    //                 } else { //there is none connected field with fields[index_field_1], we play both matches from bigger group and then one from smaller
+    //                     for (int i = 0; i < num_rounds; i++) {
+    //                         for (int k = 0; k < number_bigger_g; k++) { //first we play both matches from the bigger group/groups
+    //                             for (int j = 0; j < 2; j++) {
+    //                                 index_team_A = matches_b[i][j][0];
+    //                                 index_team_B = matches_b[i][j][1];
+    //                                 referee_index = referees_b[i][j]; //we can use referee from non playing team
+    //                                 Match new_match = new Match(groups[indexes_big_g[k]].teams[index_team_A],
+    //                                         groups[indexes_big_g[k]].teams[index_team_B],
+    //                                         groups[indexes_small_g[0]].teams[referee_index],
+    //                                         fields[index_field_1].curr_time,
+    //                                         match_t, fields[index_field_1]);
+
+    //                                 fields[index_field_1].add_match(new_match);
+    //                                 groups[indexes_big_g[k]].save_match(new_match);
+    //                             }
+    //                         }
+    //                         if (small_g_round < 3) {
+    //                             for (int k = 0; k < number_bigger_g; k++) { //then we play both matches from the smaller group/groups
+    //                                 for (int j = 0; j < 2; j++) {
+    //                                     index_team_A = matches_s[i][j][0];
+    //                                     index_team_B = matches_s[i][j][1];
+    //                                     referee_index = referees_s[i][j]; //we can use referee from non playing team
+    //                                     Match new_match = new Match(groups[indexes_small_g[k]].teams[index_team_A],
+    //                                             groups[indexes_small_g[k]].teams[index_team_B],
+    //                                             groups[indexes_big_g[0]].teams[referee_index],
+    //                                             fields[index_field_1].curr_time,
+    //                                             match_t, fields[index_field_1]);
+
+    //                                     fields[index_field_1].add_match(new_match);
+    //                                     groups[indexes_small_g[k]].save_match(new_match);
+    //                                 }
+    //                             }
+    //                             small_g_round++;
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //             break;
+    //         default:
+    //             new Exception("Number of groups is wrong");
+    //             break;
+    //         }
+        
+    // }
+
+
+//this is manualy creating some data to work with
+
+        // //for testing I can create up to 20 teams that will be named just team_0 ... team_19
+        // String[] name_numbers = new String[20]; 
+        // for (int i = 0; i < name_numbers.length; i++) {
+        //     name_numbers[i] = String.valueOf(i);
+        // }
+
+        // //loading teams for category u8
+        // String[] team_names_u8 = new String[] { "RC Bystrc", "RC Babice", "RFC Celtic", "RA Brno", "RU Donau",
+        //         "RC Bystrc 2"};
+        // String[] team_coaches_u8 = new String[] { "David Stanek", "David Volenec", "Mustafa", "Michal Boros",
+        //         "Niki Dohnal", "David Stanek"};
+        // Team[] teams_u8 = new Team[team_names_u8.length];
+        // for (int i = 0; i < teams_u8.length; i++) {
+        //     teams_u8[i] = new Team(team_names_u8[i], team_coaches_u8[i], time_to_preprare_u8, 40);
+        // }
+
+        // //loading teams for category u10 
+        // int num_teams_u10 = 4; //number of teams in category u10
+        // String[] team_names_u10 = new String[num_teams_u10];
+        // String[] team_coaches_u10 = new String[num_teams_u10];
+        // Team[] teams_u10 = new Team[num_teams_u10];
+        // for (int i = 0; i < num_teams_u10; i++) {
+        //     team_names_u10[i] = "Team " + name_numbers[i];
+        //     team_coaches_u10[i] = "Coach " + name_numbers[i];
+        //     teams_u10[i] = new Team(team_names_u10[i], team_coaches_u10[i], time_to_preprare_u10, 40);
+        // }
+
+        // //loading teams for category u12
+        // int num_teams_u12 = 8; //number of teams in category u12
+        // String[] team_names_u12 = new String[num_teams_u12];
+        // String[] team_coaches_u12 = new String[num_teams_u12];
+        // Team[] teams_u12 = new Team[num_teams_u12];
+        // for (int i = 0; i < num_teams_u12; i++) {
+        //     team_names_u12[i] = "Team " + name_numbers[i];
+        //     team_coaches_u12[i] = "Coach " + name_numbers[i];
+        //     teams_u12[i] = new Team(team_names_u12[i], team_coaches_u12[i], time_to_preprare_u12, 60);
+        // }
+
+        // //loading fields
+        // int num_fields = 3;  //number of fields
+        // String[] field_names = new String[num_fields];
+        // fields = new Field[num_fields];
+        // travel_t_fields = new int[num_fields][num_fields];
+        // for (int i = 0; i < num_fields; i++) {
+        //     field_names[i] = "Field " + name_numbers[i];
+        //     fields[i] = new Field(field_names[i]);
+        //     for (int j = 0; j < num_fields; j++) {
+        //         travel_t_fields[i][j] = i == j ? 0 : -1;     //for this test I declare that all fields are near and it takes 5 min to travel from one to another 
+        //     }
+        // }
+
+        // //loading categories
+        // categories = new Category[num_cat];
+        // categories[0] = new U8_cat(teams_u8, 6);
+        // categories[1] = new U10_cat(teams_u10, 7);
+        // categories[2] = new U12_cat(teams_u12, 9);
+
+        // create_matches();
+        // for (Field field : fields) {
+        //     print_matches(field);
+        // }
